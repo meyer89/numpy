@@ -144,15 +144,47 @@ else:
     from . import compat
     from . import lib
     from .lib import *
-    from . import linalg
-    from . import fft
-    from . import polynomial
-    from . import random
-    from . import ctypeslib
-    from . import ma
     from . import matrixlib as _mat
     from .matrixlib import *
     from .compat import long
+
+    if sys.version_info[0] >= 3 and sys.version_info[1] >= 7:
+        # for Python 3.7 and above, a __getattr__ on module base can be implemented :-)
+        def __getattr__(name: str):
+            if name == "linalg":
+                from . import linalg
+                return linalg
+
+            if name == "fft":
+                from . import fft
+                return fft
+
+            if name == "polynomial":
+                from . import polynomial
+                return polynomial
+
+            if name == "random":
+                from . import random
+                return random
+
+            if name == "ctypeslib":
+                from . import ctypeslib
+                return ctypeslib
+
+            if name == "ma":
+                from . import ma
+                return ma
+
+            return super().__getattribute__(name)
+
+    else:
+        # just do a normal import of the big optional packages here
+        from . import linalg
+        from . import fft
+        from . import polynomial
+        from . import random
+        from . import ctypeslib
+        from . import ma
 
     # Make these accessible from numpy name-space
     # but not imported in from numpy import *
@@ -170,7 +202,7 @@ else:
     __all__.extend(core.__all__)
     __all__.extend(_mat.__all__)
     __all__.extend(lib.__all__)
-    __all__.extend(['linalg', 'fft', 'random', 'ctypeslib', 'ma'])
+    __all__.extend(['linalg', 'fft', 'polynomial', 'random', 'ctypeslib', 'ma'])
 
     # Filter out Cython harmless warnings
     warnings.filterwarnings("ignore", message="numpy.dtype size changed")
